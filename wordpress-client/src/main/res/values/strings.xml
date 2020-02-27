@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Wordpress Client</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="text_post_thumbnail_des">News thumbnail</string>
+    <string name="text_post_by">by</string>
+</resources>

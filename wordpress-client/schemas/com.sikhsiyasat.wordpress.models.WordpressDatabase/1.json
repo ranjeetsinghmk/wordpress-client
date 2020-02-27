@@ -1,0 +1,106 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "dbf0f48b38cbd1bded7df789b0b5bfcd",
+    "entities": [
+      {
+        "tableName": "post",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `date` INTEGER NOT NULL, `slug` TEXT NOT NULL, `link` TEXT NOT NULL, `author` INTEGER NOT NULL, `categories` TEXT NOT NULL, `tags` TEXT NOT NULL, `featuredMedia` TEXT NOT NULL, `title_rendered` TEXT, `content_rendered` TEXT, `excerpt_rendered` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "slug",
+            "columnName": "slug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "link",
+            "columnName": "link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "author",
+            "columnName": "author",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categories",
+            "columnName": "categories",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "featuredMedia",
+            "columnName": "featuredMedia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title.rendered",
+            "columnName": "title_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "content.rendered",
+            "columnName": "content_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "excerpt.rendered",
+            "columnName": "excerpt_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_post_link_slug_title_rendered_author",
+            "unique": false,
+            "columnNames": [
+              "link",
+              "slug",
+              "title_rendered",
+              "author"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_post_link_slug_title_rendered_author` ON `${TABLE_NAME}` (`link`, `slug`, `title_rendered`, `author`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dbf0f48b38cbd1bded7df789b0b5bfcd')"
+    ]
+  }
+}

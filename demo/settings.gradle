@@ -1,0 +1,3 @@
+include ':app', ':wordpress-client', ':webview', ':logger'
+rootProject.name='Wordpress Demo'
+project(":wordpress-client").projectDir = file("../wordpress-client")
