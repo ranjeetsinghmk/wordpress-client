@@ -9,7 +9,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Client clean build
-      run: cd wordpress-client && ./gradlew clean build
     - name: Demo clean build
       run: cd demo && ./gradlew clean build
