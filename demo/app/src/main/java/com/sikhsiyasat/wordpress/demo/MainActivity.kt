@@ -5,9 +5,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.sikhsiyasat.wordpress.detail.PostFragment
-import com.sikhsiyasat.wordpress.list.PostsFragment
 import com.sikhsiyasat.wordpress.models.Post
+import com.sikhsiyasat.wordpress.ui.detail.PostFragment
+import com.sikhsiyasat.wordpress.ui.list.PostsFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val postsFragment = PostsFragment.newInstance(
-            "",
+            "https://sikhsiyasat.net",
             interactionListener
         )
 
