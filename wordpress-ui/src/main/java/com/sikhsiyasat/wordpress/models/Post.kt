@@ -2,6 +2,7 @@ package com.sikhsiyasat.wordpress.models
 
 import android.text.Html
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.room.*
 import androidx.room.OnConflictStrategy.REPLACE
 import com.google.gson.Gson
@@ -30,49 +31,20 @@ data class Post(
         post.title, post.content, post.excerpt, post.author, post.categories,
         post.tags, post.featuredMedia
     )
-
-    fun asHtml(): String = "<!DOCTYPE html>\n" +
-            "<html>\n" +
-            "<head>\n" +
-            "<title>${title?.rendered}</title>\n" +
-            "<meta name=\"viewport\" content=\"width=device-width, user-scalable=no\" />\n" +
-            "<style>img{display: inline; height: auto; max-width: 100%;}</style>\n" +
-            "</head>\n" +
-            "<body>\n" +
-            "${content?.rendered}" +
-            "</body>\n" +
-            "</html>"
-
-    companion object {
-        @JvmStatic
-        fun dummyPost(): Post {
-            return Post(
-                "",
-                Date(),
-                "",
-                "",
-                PostField(),
-                PostField(),
-                PostField(),
-                0,
-                emptyList(),
-                emptyList(),
-                ""
-            )
-        }
-    }
 }
 
 data class PostEmbeddedData(
-    val author: Author,
+    val author: List<Author>,
     @SerializedName("wp:featuredmedia")
     val featuredMedia: List<FeaturedMedia>,
     @SerializedName("wp:term")
-    val terms: List<Term>
+    val terms: List<List<Term>>
 )
 
 
+@Entity(indices = [Index("id", "name", "taxonomy")])
 data class Term(
+    @PrimaryKey
     val id: Int,
     val link: String,
     val name: String,
@@ -80,12 +52,13 @@ data class Term(
     val taxonomy: TermTaxonomy
 )
 
-
 enum class TermTaxonomy {
     category, post_tag
 }
 
+@Entity(indices = [Index("id", "mimeType", "taxonomy")])
 data class FeaturedMedia(
+    @PrimaryKey
     val id: String,
     val type: String,
     val sourceUrl: String,
@@ -98,7 +71,9 @@ data class MediaDetails(
     val height: Int
 )
 
+@Entity(indices = [Index("id", "name", "slug")])
 data class Author(
+    @PrimaryKey
     val id: String,
     val name: String,
     val url: String,
@@ -141,16 +116,83 @@ data class PostEntity(
     val categories: List<Int>,
     val tags: List<Int>,
     val featuredMedia: String
-) {
-    constructor(post: Post) : this(
-        post.id ?: "", post.date ?: Date(),
-        post.slug ?: "", post.link ?: "",
-        post.title ?: PostField(), post.content ?: PostField(),
-        post.excerpt ?: PostField(), post.author, post.categories ?: emptyList(),
-        post.tags ?: emptyList(), post.featuredMedia ?: ""
-    )
+)
+
+class DisplayablePostLiveData(
+    private val postLD: LiveData<PostEntity?>,
+    private val authorLD: LiveData<Author?>,
+    private val categoriesLD: LiveData<List<Term>>,
+    private val tagsLD: LiveData<List<Term>>,
+    private val featureMediaLD: LiveData<FeaturedMedia?>
+) : MediatorLiveData<DisplayablePost?>() {
+    private fun combine() {
+        val postEntity = postLD.value
+        val author = authorLD.value
+        val categories = categoriesLD.value
+        val tags = tagsLD.value
+        val featuredMedia = featureMediaLD.value
+
+        value =
+            if (postEntity == null || author == null || categories == null || tags == null || featuredMedia == null) {
+                null
+            } else {
+                DisplayablePost(
+                    postEntity.id,
+                    postEntity.date,
+                    postEntity.slug,
+                    postEntity.link,
+                    postEntity.title,
+                    postEntity.content,
+                    postEntity.excerpt,
+                    author, categories, tags, featuredMedia
+                )
+            }
+
+    }
+
+    init {
+        addSource(postLD) { combine() }
+        addSource(authorLD) { combine() }
+        addSource(categoriesLD) { combine() }
+        addSource(tagsLD) { combine() }
+        addSource(featureMediaLD) { combine() }
+    }
 }
 
+data class DisplayablePost(
+    val id: String,
+    val date: Date,
+    val slug: String,
+    val link: String,
+    val title: PostField,
+    val content: PostField,
+    val excerpt: PostField,
+    val author: Author,
+    val categories: List<Term>,
+    val tags: List<Term>,
+    val featuredMedia: FeaturedMedia
+) {
+    fun asHtml(): String? = content.rendered?.let { contentRendered ->
+        "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<title>${title.rendered}</title>\n" +
+                "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "<style>\n" +
+                "   .wp-caption{width:100%!important;}\n" +
+                "   img.size-full{\n" +
+                "       width:98%;\n" +
+                "       margin:0px auto;  \n" +
+                "       height: auto;\n" +
+                "   }" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "   $contentRendered" +
+                "</body>\n" +
+                "</html>"
+    }
+}
 
 @Database(entities = [PostEntity::class], version = 1)
 @TypeConverters(Converters::class)
@@ -173,6 +215,8 @@ interface PostDao {
     @Query("SELECT * FROM post WHERE link like :likeExp")
     fun loadWhereLinkLike(likeExp: String): LiveData<List<PostEntity>>
 }
+
+//TODO implement daossssss
 
 
 class Converters {

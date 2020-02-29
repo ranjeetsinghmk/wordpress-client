@@ -5,6 +5,8 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.sikhsiyasat.logger.SSLogger
+import com.sikhsiyasat.wordpress.models.DisplayablePost
+import com.sikhsiyasat.wordpress.models.DisplayablePostLiveData
 import com.sikhsiyasat.wordpress.models.Post
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,9 +20,11 @@ class WordpressRepository(
 
     private val logger: SSLogger = SSLogger.getLogger("Wordpress repository")
 
-    fun getPost(postUrl: String): LiveData<Post?> {
+    fun getPost(postUrl: String): LiveData<DisplayablePost?> {
         refreshPost(postUrl)
-        return localStorageService.getPost(postUrl)
+        return DisplayablePostLiveData(
+            localStorageService.getPost(postUrl)
+        )
     }
 
     private fun refreshPost(postUrl: String): LiveData<Post> {

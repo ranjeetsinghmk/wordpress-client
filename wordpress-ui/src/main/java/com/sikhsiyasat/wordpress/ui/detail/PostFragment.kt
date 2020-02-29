@@ -71,7 +71,6 @@ class PostFragment : Fragment() {
         })
 
         val webSettings: WebSettings = webview.settings
-        webSettings.builtInZoomControls = true
         webSettings.domStorageEnabled = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
@@ -84,14 +83,16 @@ class PostFragment : Fragment() {
 
         viewModel.post
             .observe(viewLifecycleOwner) { post ->
-                webview.loadDataWithBaseURL(
-                    baseUrl = null,
-                    data = post.asHtml(),
-                    mimeType = "text/html; charset=utf-8",
-                    encoding = "UTF-8",
-                    historyUrl = null
-                )
-                toolbar.title = post.title?.spannedText
+                post?.asHtml()?.let { spannedHtml ->
+                    webview.loadDataWithBaseURL(
+                        baseUrl = null,
+                        data = spannedHtml,
+                        mimeType = "text/html; charset=utf-8",
+                        encoding = "UTF-8",
+                        historyUrl = null
+                    )
+                }
+                toolbar.title = post?.title?.spannedText
             }
     }
 }

@@ -10,14 +10,8 @@ import com.sikhsiyasat.wordpress.models.PostEntity
 class LocalStorageService constructor(
     private val postDao: PostDao
 ) {
-    fun getPost(postUrl: String): LiveData<Post?> {
-        return Transformations.map(postDao.loadByLink(postUrl)) { postEntity ->
-            postEntity?.let { it ->
-                Post(
-                    it
-                )
-            }
-        }
+    fun getPost(postUrl: String): LiveData<PostEntity?> {
+        return postDao.loadByLink(postUrl)
     }
 
     fun savePosts(posts: List<Post>) {
