@@ -1,3 +1,6 @@
-include ':app', ':wordpress-ui', ':webview', ':logger', ':wordpress-api', ':wordpress-core'
+include ':app', ':wordpress-core', ':webview', ':logger', ':wordpress-api'
 rootProject.name='Wordpress Demo'
-project(":wordpress-ui").projectDir = file("../wordpress-ui")
+project(":wordpress-core").projectDir = file("../wordpress-core")
+project(":wordpress-api").projectDir = file("../wordpress-api")
+project(":webview").projectDir = file("../webview")
+project(":logger").projectDir = file("../logger")

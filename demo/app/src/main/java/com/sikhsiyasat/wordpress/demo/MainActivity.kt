@@ -5,14 +5,14 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.sikhsiyasat.wordpress.models.Post
+import com.sikhsiyasat.wordpress.models.DisplayablePost
 import com.sikhsiyasat.wordpress.ui.detail.PostFragment
 import com.sikhsiyasat.wordpress.ui.list.PostsFragment
 
 class MainActivity : AppCompatActivity() {
 
     private val interactionListener = object : PostsFragment.InteractionListener {
-        override fun goToPostDetailPage(post: Post) {
+        override fun goToPostDetailPage(post: DisplayablePost) {
             post.link?.let { postLink ->
                 addFragment(PostFragment.newInstance(postLink))
             }

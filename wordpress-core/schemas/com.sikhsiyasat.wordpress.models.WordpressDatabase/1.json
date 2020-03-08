@@ -1,0 +1,319 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "1b6448d0e935135a84b2c98996d0ce45",
+    "entities": [
+      {
+        "tableName": "post",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `date` INTEGER NOT NULL, `slug` TEXT NOT NULL, `link` TEXT NOT NULL, `author` INTEGER NOT NULL, `categories` TEXT NOT NULL, `tags` TEXT NOT NULL, `featuredMedia` TEXT NOT NULL, `title_rendered` TEXT, `title_protected` INTEGER NOT NULL, `content_rendered` TEXT, `content_protected` INTEGER NOT NULL, `excerpt_rendered` TEXT, `excerpt_protected` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "slug",
+            "columnName": "slug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "link",
+            "columnName": "link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "author",
+            "columnName": "author",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categories",
+            "columnName": "categories",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tags",
+            "columnName": "tags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "featuredMedia",
+            "columnName": "featuredMedia",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title.rendered",
+            "columnName": "title_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "title.protected",
+            "columnName": "title_protected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content.rendered",
+            "columnName": "content_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "content.protected",
+            "columnName": "content_protected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "excerpt.rendered",
+            "columnName": "excerpt_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "excerpt.protected",
+            "columnName": "excerpt_protected",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_post_link_slug_title_rendered_author",
+            "unique": false,
+            "columnNames": [
+              "link",
+              "slug",
+              "title_rendered",
+              "author"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_post_link_slug_title_rendered_author` ON `${TABLE_NAME}` (`link`, `slug`, `title_rendered`, `author`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "author",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `url` TEXT NOT NULL, `description` TEXT NOT NULL, `link` TEXT NOT NULL, `slug` TEXT NOT NULL, `avatar_twentyFour` TEXT, `avatar_fortyEight` TEXT, `avatar_ninetySix` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "link",
+            "columnName": "link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "slug",
+            "columnName": "slug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avatarUrls.twentyFour",
+            "columnName": "avatar_twentyFour",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "avatarUrls.fortyEight",
+            "columnName": "avatar_fortyEight",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "avatarUrls.ninetySix",
+            "columnName": "avatar_ninetySix",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_author_id_name_slug",
+            "unique": false,
+            "columnNames": [
+              "id",
+              "name",
+              "slug"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_author_id_name_slug` ON `${TABLE_NAME}` (`id`, `name`, `slug`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "wp_temp",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `link` TEXT NOT NULL, `name` TEXT NOT NULL, `slug` TEXT NOT NULL, `taxonomy` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "link",
+            "columnName": "link",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "slug",
+            "columnName": "slug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "taxonomy",
+            "columnName": "taxonomy",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_wp_temp_id_name_taxonomy",
+            "unique": false,
+            "columnNames": [
+              "id",
+              "name",
+              "taxonomy"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_wp_temp_id_name_taxonomy` ON `${TABLE_NAME}` (`id`, `name`, `taxonomy`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "feature_media",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceUrl` TEXT NOT NULL, `mimeType` TEXT NOT NULL, `media_width` INTEGER NOT NULL, `media_height` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceUrl",
+            "columnName": "sourceUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mimeType",
+            "columnName": "mimeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaDetails.width",
+            "columnName": "media_width",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaDetails.height",
+            "columnName": "media_height",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_feature_media_id_type_mimeType",
+            "unique": false,
+            "columnNames": [
+              "id",
+              "type",
+              "mimeType"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_feature_media_id_type_mimeType` ON `${TABLE_NAME}` (`id`, `type`, `mimeType`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1b6448d0e935135a84b2c98996d0ce45')"
+    ]
+  }
+}
