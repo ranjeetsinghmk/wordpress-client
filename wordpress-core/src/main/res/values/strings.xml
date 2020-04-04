@@ -4,4 +4,14 @@
     <string name="action_settings">Settings</string>
     <string name="text_post_thumbnail_des">News thumbnail</string>
     <string name="text_post_by">by</string>
+    <string name="action_bookmark">Toggle bookmark</string>
+    <string name="action_share">Share</string>
+    <string name="action_text_size_change">Text size</string>
+    <string name="action_text_to_speech">"Tex to speech"</string>
+    <string name="text_extra_small">Extra Small</string>
+    <string name="text_small">Small</string>
+    <string name="text_normal">Normal</string>
+    <string name="text_large">Large</string>
+    <string name="text_extra_large">Extra Large</string>
+    <string name="text_text_to_speech_not_enabled">Text to speech is not enabled for this page</string>
 </resources>

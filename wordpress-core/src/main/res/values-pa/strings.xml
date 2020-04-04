@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_bookmark">ਬੁਕਮਾਰਕ ਕਰੋ</string>
+    <string name="action_share">ਸਾਂਝਾ ਕਰੋ</string>
+    <string name="action_text_size_change">ਅੱਖਰੀ ਆਕਾਰ ਬਦਲੋ</string>
+    <string name="app_name">ਵਰਡਪਰੇਸ ਕਲਾਇੰਟ</string>
+    <string name="title_activity_main">ਮੇਨ ਅਕਟੀਵੀਟੀ</string>
+    <string name="action_settings">ਜੜਤ</string>
+    <string name="text_post_thumbnail_des">ਖਬਰਾਂਂ ਤਸਵੀਰ</string>
+    <string name="text_post_by">ਲਿਖਾਰੀ</string>
+    <string name="action_text_to_speech">"ਬੋਲਣ ਵਾਸਤੇ"</string>
+    <string name="text_extra_small">ਬਹੁਤ ਨਿੱਕੇ ਅੱਖਰ</string>
+    <string name="text_small">ਨਿੱਕੇ ਅੱਖਰ</string>
+    <string name="text_normal">ਸਾਧਾਰਨ ਅੱਖਰ</string>
+    <string name="text_large">ਬੱਡੇ ਅੱਖਰ</string>
+    <string name="text_extra_large">ਬਹੁਤ ਬੱਡੇ ਅੱਖਰ</string>
+    <string name="text_text_to_speech_not_enabled">ਲਿਖਿਆ ਬੋਲਕੇ ਸੁਣਾਉਣ ਦੀ ਸੁਵਿਧਾ ਇੱਸ ਪੇਜੇ ਲਈ ਉਪਲਬਦ ਨਹੀਂ ਹੈ ਜੀ</string>
+</resources>

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1b6448d0e935135a84b2c98996d0ce45",
+    "identityHash": "19f36da798ef3e6d049e6650ec42195d",
     "entities": [
       {
         "tableName": "post",
@@ -250,7 +250,7 @@
       },
       {
         "tableName": "feature_media",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceUrl` TEXT NOT NULL, `mimeType` TEXT NOT NULL, `media_width` INTEGER NOT NULL, `media_height` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `type` TEXT NOT NULL, `sourceUrl` TEXT NOT NULL, `mimeType` TEXT NOT NULL, `caption_rendered` TEXT, `caption_protected` INTEGER NOT NULL, `media_width` INTEGER NOT NULL, `media_height` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -274,6 +274,18 @@
             "fieldPath": "mimeType",
             "columnName": "mimeType",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "caption.rendered",
+            "columnName": "caption_rendered",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "caption.protected",
+            "columnName": "caption_protected",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -313,7 +325,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1b6448d0e935135a84b2c98996d0ce45')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '19f36da798ef3e6d049e6650ec42195d')"
     ]
   }
 }
