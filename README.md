@@ -21,3 +21,5 @@
 - Position of several widgets can be made customizable
 
 
+Please refer to the [Wiki](https://github.com/ranjeetsinghmk/wordpress-client/wiki) for more information.
+
