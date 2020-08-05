@@ -11,12 +11,13 @@ import com.google.gson.reflect.TypeToken
 import com.sikhsiyasat.wordpress.api.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.HashMap
 
-//TODO separate out category & tags
-@Entity(tableName = "wp_temp", indices = [Index("id", "name", "taxonomy")])
+@Entity(tableName = "term", indices = [Index("id", "name", "taxonomy")])
 data class TermEntity(
         @PrimaryKey
-        val id: Int,
+        val id: String,
         val link: String,
         val name: String,
         val slug: String,
@@ -68,33 +69,71 @@ data class AvatarUrlsEntity(
 )
 
 
-@Entity(tableName = "post", indices = [Index("link", "slug", "title_rendered", "author")])
+@Entity(tableName = "post", indices = [Index("link", "slug", "title_rendered", "author", "date")])
 data class PostEntity(
         @PrimaryKey
         val id: String,
         val date: Date,
+        val modifiedGmt: Date,
         val slug: String,
         val link: String,
         @Embedded(prefix = "title_")
         val title: PostField,
-        @Embedded(prefix = "content_")
-        val content: PostField,
         @Embedded(prefix = "excerpt_")
         val excerpt: PostField,
-        val author: Int,
-        val categories: List<Int>,
-        val tags: List<Int>,
+        val author: String,
+        val categories: List<String>,
+        val tags: List<String>,
         val featuredMedia: String
 )
 
+@Entity(tableName = "post_term", primaryKeys = ["postId", "termId"])
+data class PostTermEntity(
+        val postId: String,
+        val termId: String
+)
+
+@Entity(tableName = "post_content")
+data class PostContentEntity(
+        @PrimaryKey
+        val postId: String,
+        @Embedded(prefix = "content_")
+        val content: PostField
+)
+
+data class PostWithContent(
+        @Embedded val post: PostEntity,
+        @Relation(
+                parentColumn = "id",
+                entityColumn = "postId"
+        )
+        val postContent: PostContentEntity?
+)
+
 class DisplayablePostLiveData(
-        private val posts: List<PostEntity>,
+        private val posts: List<PostWithContent>,
         private val authorsLD: LiveData<List<AuthorEntity>>,
         private val categoriesLD: LiveData<List<TermEntity>>,
         private val tagsLD: LiveData<List<TermEntity>>,
         private val featureMediaLD: LiveData<List<FeaturedMediaEntity>>
 ) : MediatorLiveData<List<DisplayablePost>>() {
+    private val eventCount: Map<String, AtomicInteger> = HashMap<String, AtomicInteger>().apply {
+        put("authorsLD", AtomicInteger(0))
+        put("categoriesLD", AtomicInteger(0))
+        put("tagsLD", AtomicInteger(0))
+        put("featureMediaLD", AtomicInteger(0))
+    }
+
+    private var lastCount = AtomicInteger(0)
+
     private fun combine() {
+        if (eventCount.values.map { it.get() }
+                        .any { it <= lastCount.get() }) {
+            return
+        }
+
+        lastCount.incrementAndGet()
+
         val authors = authorsLD.value ?: emptyList()
         val categories = categoriesLD.value ?: emptyList()
         val tags = tagsLD.value ?: emptyList()
@@ -102,27 +141,42 @@ class DisplayablePostLiveData(
 
         value = posts.map { postEntity ->
             DisplayablePost(
-                    postEntity.id,
-                    postEntity.date,
-                    postEntity.slug,
-                    postEntity.link,
-                    postEntity.title,
-                    postEntity.content,
-                    postEntity.excerpt,
-                    authors.firstOrNull { it.id == postEntity.author.toString() },
-                    categories.filter { it.id in postEntity.categories },
-                    tags.filter { it.id in postEntity.tags },
-                    featuredMediaList.firstOrNull { it.id == postEntity.featuredMedia }
+                    postEntity.post.id,
+                    postEntity.post.date,
+                    postEntity.post.slug,
+                    postEntity.post.link,
+                    postEntity.post.title,
+                    postEntity.postContent?.content ?: PostField(),
+                    postEntity.post.excerpt,
+                    authors.firstOrNull { it.id == postEntity.post.author },
+                    categories.filter { it.id in postEntity.post.categories },
+                    tags.filter { it.id in postEntity.post.tags },
+                    featuredMediaList.firstOrNull { it.id == postEntity.post.featuredMedia }
             )
         }
     }
 
     init {
-        addSource(authorsLD) { combine() }
-        addSource(categoriesLD) { combine() }
-        addSource(tagsLD) { combine() }
-        addSource(featureMediaLD) { combine() }
-        combine()
+        addSource(authorsLD) {
+            if (eventCount["authorsLD"]?.incrementAndGet() == 1 || authorsLD.value?.size != it.size) {
+                combine()
+            }
+        }
+        addSource(categoriesLD) {
+            if (eventCount["categoriesLD"]?.incrementAndGet() == 1 || categoriesLD.value?.size != it.size) {
+                combine()
+            }
+        }
+        addSource(tagsLD) {
+            if (eventCount["tagsLD"]?.incrementAndGet() == 1 || tagsLD.value?.size != it.size) {
+                combine()
+            }
+        }
+        addSource(featureMediaLD) {
+            if (eventCount["featureMediaLD"]?.incrementAndGet() == 1 || featureMediaLD.value?.size != it.size) {
+                combine()
+            }
+        }
     }
 }
 
@@ -155,20 +209,20 @@ data class DisplayablePost(
                             "class=\"wp-caption-text\">${mediaEntity.caption.rendered}" +
                             "</div>"
                 } ?: "") +
-                "</div>\n"
+                "</div>"
     } ?: ""
 
 
-    private val styles = "<style>\n" +
+    private val styles = "<style>" +
             "   .wp-caption{" +
             "       width:100%!important;" +
             "       margin-top:15px;" +
-            "   }\n" +
-            "   img.size-full{\n" +
-            "       width:98%;\n" +
-            "       margin:0px auto;  \n" +
-            "       position:relative;  \n" +
-            "       height: auto;\n" +
+            "   }" +
+            "   img.size-full{" +
+            "       width:98%;" +
+            "       margin:0px auto;  " +
+            "       position:relative;  " +
+            "       height: auto;" +
             "   }" +
             "   .wp-caption-text {" +
             "           border-bottom:1px red;" +
@@ -181,8 +235,8 @@ data class DisplayablePost(
             "           margin-top:15px;" +
             "       }" +
             "   iframe{" +
-            "       max-width:98%;\n" +
-            "       margin:0px auto;  \n" +
+            "       max-width:98%;" +
+            "       margin:0px auto;  " +
             "   }" +
             "   strong {" +
             "           font-size:${theme.headingFontSize}px;" +
@@ -198,25 +252,46 @@ data class DisplayablePost(
             "       font-style:italic;" +
             "       font-color:#444;" +
             "   }" +
-            "</style>\n"
+            "   .loader {" +
+            "       border: 3px solid #f3f3f3;" +
+            "       border-radius: 50%;" +
+            "       border-top: 3px solid #3498db;" +
+            "       width: 24px;" +
+            "       height: 24px;" +
+            "       -webkit-animation: spin 2s linear infinite; /* Safari */" +
+            "       animation: spin 2s linear infinite;" +
+            "       margin: 0px auto;" +
+            "   }" +
+            "   /* Safari */" +
+            "   @-webkit-keyframes spin {" +
+            "       0% { -webkit-transform: rotate(0deg); }" +
+            "       100% { -webkit-transform: rotate(360deg); }" +
+            "   }" +
+            "   @keyframes spin {" +
+            "       0% { transform: rotate(0deg); }" +
+            "       100% { transform: rotate(360deg); }" +
+            "   }" +
+            "</style>"
 
-    fun asHtml(): String? = content.rendered?.let { contentRendered ->
-        "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "<title>${title.rendered}</title>\n" +
-                "<meta name=\"viewport\" content=\"initial-scale=1.0, maximum-scale=3.0, user-scalable=no, width=device-width\">" +
-                styles +
-                "</head>\n" +
-                "<body class='ssn-post-body'>\n" +
-                "   $titleAsHtml" +
-                (author?.name?.let { "<p class='ssn-post-author'>$it</p>" } ?: "") +
-                "<p class='ssn-post-date'>${SimpleDateFormat("dd MMM, YYYY hh:mm a", Locale.getDefault()).format(date)}</p>" +
-                "   $featuredMediaHtml" +
-                "   <div class='ssn-post-body_content'>$contentRendered</div>" +
-                "</body>\n" +
-                "</html>"
-    }
+    fun asHtml(): String? =
+            "<!DOCTYPE html>" +
+                    "<html>" +
+                    "<head>" +
+                    "<title>${title.rendered}</title>" +
+                    "<meta name=\"viewport\" content=\"initial-scale=1.0, maximum-scale=3.0, user-scalable=no, width=device-width\">" +
+                    styles +
+                    "</head>" +
+                    "<body class='ssn-post-body'>" +
+                    "   $titleAsHtml" +
+                    (author?.name?.let { "<p class='ssn-post-author'>$it</p>" } ?: "") +
+                    "<p class='ssn-post-date'>${SimpleDateFormat("dd MMM, YYYY hh:mm a", Locale.getDefault()).format(date)}</p>" +
+                    "   $featuredMediaHtml" +
+                    "   <div class='ssn-post-body_content'>" +
+                    "       ${content.rendered?.notEmpty() ?: "<div class=\"loader\"></div>"}" +
+                    "   </div>" +
+                    "</body>" +
+                    "</html>"
+
 
 }
 
@@ -266,13 +341,16 @@ sealed class PostTheme(
 
 @Database(
         entities = [
-            PostEntity::class, AuthorEntity::class, TermEntity::class, FeaturedMediaEntity::class
+            PostEntity::class, PostContentEntity::class, AuthorEntity::class,
+            TermEntity::class, FeaturedMediaEntity::class, PostTermEntity::class
         ],
         version = 1
 )
 @TypeConverters(Converters::class)
 abstract class WordpressDatabase : RoomDatabase() {
     abstract fun postDao(): PostDao
+    abstract fun postContentDao(): PostContentDao
+    abstract fun postTermDao(): PostTermDao
     abstract fun authorDao(): AuthorDao
     abstract fun termDao(): TermDao
     abstract fun featuredMediaDao(): FeaturedMediaDao
@@ -282,16 +360,40 @@ abstract class WordpressDatabase : RoomDatabase() {
 @Dao
 interface PostDao {
     @Insert(onConflict = REPLACE)
-    fun save(post: PostEntity)
-
-    @Insert(onConflict = REPLACE)
     fun save(post: Set<PostEntity>)
 
-    @Query("SELECT * FROM post WHERE link = :link")
-    fun loadByLink(link: String): LiveData<PostEntity?>
+    @Query("SELECT * FROM post WHERE link = :link order by date desc limit 1")
+    fun loadByLink(link: String): LiveData<PostWithContent?>
 
-    @Query("SELECT * FROM post WHERE link like :likeExp")
+    @Query("SELECT * FROM post WHERE link like :likeExp order by date desc")
     fun loadWhereLinkLike(likeExp: String): LiveData<List<PostEntity>>
+
+    @Query("SELECT * FROM post")
+    fun getAll(): List<PostEntity>
+
+    @Query("SELECT * FROM post WHERE link like :likeExp and id not in (:exceptIds) and (id in (:ids) or author in (:authorIds)) order by date desc")
+    fun findPosts(likeExp: String, ids: Set<String>, authorIds: Set<String>, exceptIds: Set<String>): LiveData<List<PostEntity>>
+
+    @Query("SELECT * FROM post WHERE link like :likeExp and id not in (:exceptIds) and (id in (:ids) or author in (:authorIds)) order by date desc limit 10")
+    fun findTopPosts(likeExp: String, ids: Set<String>, authorIds: Set<String>, exceptIds: Set<String>): LiveData<List<PostEntity>>
+}
+
+@Dao
+interface PostContentDao {
+    @Insert(onConflict = REPLACE)
+    fun save(post: Set<PostContentEntity>)
+}
+
+@Dao
+interface PostTermDao {
+    @Insert(onConflict = REPLACE)
+    fun save(posts: List<PostTermEntity>)
+
+    @Query("SELECT distinct(postId) FROM post_term WHERE termId in (:terms)")
+    fun findPostsByTermIdIn(terms: Set<String>): LiveData<List<String>>
+
+    @Query("SELECT * FROM post_term WHERE postId in (:posts)")
+    fun findByPostIds(posts: List<String>): List<PostTermEntity>
 }
 
 @Dao
@@ -303,7 +405,7 @@ interface AuthorDao {
     fun save(authors: Set<AuthorEntity>)
 
     @Query("SELECT * FROM author WHERE id in (:ids)")
-    fun load(ids: List<String>): LiveData<List<AuthorEntity>>
+    fun findByIdIn(ids: Set<String>): List<AuthorEntity>
 }
 
 @Dao
@@ -311,8 +413,11 @@ interface TermDao {
     @Insert(onConflict = REPLACE)
     fun save(post: Set<TermEntity>)
 
-    @Query("SELECT * FROM wp_temp WHERE id in (:ids)")
-    fun load(ids: List<String>): LiveData<List<TermEntity>>
+    @Query("SELECT * FROM term WHERE id in (:ids)")
+    fun findByIdIn(ids: List<String>): List<TermEntity>
+
+    @Query("SELECT * FROM term WHERE id in (:ids)")
+    fun findLDByIdIn(ids: List<String>): LiveData<List<TermEntity>>
 }
 
 @Dao
@@ -321,37 +426,26 @@ interface FeaturedMediaDao {
     fun save(media: Set<FeaturedMediaEntity>)
 
     @Query("SELECT * FROM feature_media WHERE id in (:ids)")
-    fun load(ids: List<String>): LiveData<List<FeaturedMediaEntity>>
+    fun load(ids: Set<String>): LiveData<List<FeaturedMediaEntity>>
+
+    @Query("SELECT * FROM feature_media WHERE id in (:ids)")
+    fun getByIdInNow(ids: List<String>): List<FeaturedMediaEntity>
 }
 
 object PostMapper {
-    fun post(postEntity: PostEntity): Post = Post(
-            postEntity.id,
-            postEntity.date,
-            postEntity.slug,
-            postEntity.link,
-            postEntity.title,
-            postEntity.content,
-            postEntity.excerpt,
-            postEntity.author,
-            postEntity.categories,
-            postEntity.tags,
-            postEntity.featuredMedia
-    )
-
-    fun postEntity(postEntity: Post): PostEntity? {
+    fun postEntity(post: Post): PostEntity? {
         return PostEntity(
-                postEntity.id!!,
-                postEntity.date ?: Date(0),
-                postEntity.slug!!,
-                postEntity.link!!,
-                postEntity.title ?: PostField(),
-                postEntity.content ?: PostField(),
-                postEntity.excerpt ?: PostField(),
-                postEntity.author,
-                postEntity.categories ?: emptyList(),
-                postEntity.tags ?: emptyList(),
-                postEntity.featuredMedia ?: ""
+                post.id!!,
+                post.date ?: Date(0),
+                post.modifiedGmt ?: Date(0),
+                post.slug!!,
+                post.link!!,
+                post.title ?: PostField(),
+                post.excerpt ?: PostField(),
+                post.author,
+                post.categories ?: emptyList(),
+                post.tags ?: emptyList(),
+                post.featuredMedia ?: ""
         )
     }
 
@@ -407,13 +501,13 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromIntList(value: List<*>): String? {
+    fun fromStringList(value: List<*>): String? {
         return Gson().toJson(value)
     }
 
     @TypeConverter
-    fun toIntList(string: String?): List<Int> {
-        val listType = object : TypeToken<List<Int>>() {}.type
+    fun toStringList(string: String?): List<String> {
+        val listType = object : TypeToken<List<String>>() {}.type
         return Gson().fromJson(string, listType)
     }
 

@@ -22,8 +22,8 @@ object AppScope {
 class WebClient(private val retrofitServiceFactory: RetrofitServiceFactory) {
     fun webService(websiteUrl: String): WebService {
         return WebServiceImpl(
-            retrofitServiceFactory.provideRetrofit(websiteUrl)
-                .create(WebserviceInternal::class.java)
+                retrofitServiceFactory.provideRetrofit(websiteUrl)
+                        .create(WebserviceInternal::class.java)
         )
     }
 }
@@ -39,38 +39,34 @@ class RetrofitServiceFactory {
     }
 
     private fun retrofit(websiteUrl: String): Retrofit = Retrofit.Builder()
-        .baseUrl("$websiteUrl/wp-json/wp/v2/")
+            .baseUrl("$websiteUrl/wp-json/wp/v2/")
 //        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .client(okHttpClient)
-        .addConverterFactory(
-            GsonConverterFactory.create(
-                GsonBuilder()
-                    .enableComplexMapKeySerialization()
-                    .serializeNulls()
-                    .setDateFormat("yyyy-MM-dd'T'hh:mm:ss")
-                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                    .setPrettyPrinting()
-                    .setVersion(1.0)
-                    .create()
+            .client(okHttpClient)
+            .addConverterFactory(
+                    GsonConverterFactory.create(
+                            GsonBuilder()
+                                    .enableComplexMapKeySerialization()
+                                    .serializeNulls()
+                                    .setDateFormat("yyyy-MM-dd'T'hh:mm:ss")
+                                    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                                    .setPrettyPrinting()
+                                    .setVersion(1.0)
+                                    .create()
+                    )
             )
-        )
-        .build()
+            .build()
 
 
     private val okHttpClient: OkHttpClient
         get() =
             OkHttpClient.Builder()
-                .hostnameVerifier { _: String?, _: SSLSession? -> true }
-                .readTimeout(120, TimeUnit.SECONDS)
-                .writeTimeout(120, TimeUnit.SECONDS)
-                .connectTimeout(120, TimeUnit.SECONDS)
-                .addInterceptor(HttpLoggingInterceptor()
-                    .apply {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    })
-                .build()
-}
-
-object ListPostsScope {
-
+                    .hostnameVerifier { _: String?, _: SSLSession? -> true }
+                    .readTimeout(120, TimeUnit.SECONDS)
+                    .writeTimeout(120, TimeUnit.SECONDS)
+                    .connectTimeout(120, TimeUnit.SECONDS)
+                    .addInterceptor(HttpLoggingInterceptor()
+                            .apply {
+                                level = HttpLoggingInterceptor.Level.BODY
+                            })
+                    .build()
 }

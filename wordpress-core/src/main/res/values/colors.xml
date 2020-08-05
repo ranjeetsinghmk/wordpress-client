@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="colorPrimary">#607D8B</color>
+    <color name="colorPrimary1">#ca4a626e</color>
+    <color name="colorPrimaryDark">#455A64</color>
+    <color name="colorPrimaryLight">#CFD8DC</color>
+    <color name="colorAccent">#c51162</color>
+    <color name="white">#fff</color>
+    <color name="screen_back_dark_white">@color/white</color>
+    <color name="dimWhite">#b5ffffff</color>
+    <color name="light_grey">#d3d3d3</color>
+    <color name="black">#000000</color>
+    <color name="blue">#448aff</color>
+    <color name="semi_transparent">#88000000</color>
+    <color name="my_foreground_material_light">#000000</color>
+    <color name="foreground_material_light" tools:ignore="PrivateResource">#000000</color>
+
+
+    <color name="contentPrimaryLightColor">#5472d3</color>
+    <color name="contentSecondaryColor">#e65100</color>
+    <color name="grey">#eee</color>
+    <color name="surma">#888</color>
+    <color name="dark_surma">#222</color>
+</resources>

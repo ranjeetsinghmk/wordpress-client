@@ -7,14 +7,15 @@ import java.util.*
 data class Post(
         val id: String?,
         val date: Date?,
+        val modifiedGmt: Date?,
         val slug: String?,
         val link: String?,
         val title: PostField?,
         val content: PostField?,
         val excerpt: PostField?,
-        val author: Int,
-        val categories: List<Int>?,
-        val tags: List<Int>?,
+        val author: String,
+        val categories: List<String>?,
+        val tags: List<String>?,
         val featuredMedia: String?,
         @SerializedName("_embedded")
         val embeddedData: PostEmbeddedData? = null
@@ -34,8 +35,12 @@ data class PostField(var rendered: String? = "", var protected: Boolean = false)
         get() = Html.fromHtml(rendered).toString()
 }
 
+fun String.notEmpty(): String? {
+    return if (isBlank()) null else this
+}
+
 data class Term(
-        val id: Int,
+        val id: String,
         val link: String,
         val name: String,
         val slug: String,

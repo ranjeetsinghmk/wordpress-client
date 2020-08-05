@@ -44,8 +44,8 @@ class SmartWebView : WebView, NestedScrollingChild {
     }
 
     constructor(context: Context?, attrs: AttributeSet?) : super(
-        context,
-        attrs
+            context,
+            attrs
     ) {
         addedJavascriptInterface = false
         mChildHelper = NestedScrollingChildHelper(this)
@@ -53,9 +53,9 @@ class SmartWebView : WebView, NestedScrollingChild {
     }
 
     constructor(
-        context: Context?,
-        attrs: AttributeSet?,
-        defStyle: Int
+            context: Context?,
+            attrs: AttributeSet?,
+            defStyle: Int
     ) : super(context, attrs, defStyle) {
         addedJavascriptInterface = false
         mChildHelper = NestedScrollingChildHelper(this)
@@ -68,7 +68,7 @@ class SmartWebView : WebView, NestedScrollingChild {
      * @return true it the video is being displayed using a custom view (typically full-app_logo)
      */
     val isVideoFullscreen: Boolean
-        get() = videoEnabledWebChromeClient != null && videoEnabledWebChromeClient!!.isVideoFullscreen
+        get() = videoEnabledWebChromeClient != null && videoEnabledWebChromeClient?.isVideoFullscreen ?: false
 
     /**
      * Pass only a VideoEnabledWebChromeClient instance.
@@ -83,20 +83,20 @@ class SmartWebView : WebView, NestedScrollingChild {
     }
 
     override fun loadData(
-        data: String,
-        mimeType: String?,
-        encoding: String?
+            data: String,
+            mimeType: String?,
+            encoding: String?
     ) {
         addJavascriptInterface()
         super.loadData(data, mimeType, encoding)
     }
 
     override fun loadDataWithBaseURL(
-        baseUrl: String?,
-        data: String,
-        mimeType: String?,
-        encoding: String?,
-        historyUrl: String?
+            baseUrl: String?,
+            data: String,
+            mimeType: String?,
+            encoding: String?,
+            historyUrl: String?
     ) {
         addJavascriptInterface()
         super.loadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl)
@@ -108,8 +108,8 @@ class SmartWebView : WebView, NestedScrollingChild {
     }
 
     override fun loadUrl(
-        url: String,
-        additionalHttpHeaders: Map<String, String>
+            url: String,
+            additionalHttpHeaders: Map<String, String>
     ) {
         addJavascriptInterface()
         super.loadUrl(url, additionalHttpHeaders)
@@ -118,15 +118,15 @@ class SmartWebView : WebView, NestedScrollingChild {
     private fun addJavascriptInterface() {
         if (!addedJavascriptInterface) { // Add javascript interface to be called when the video ends (must be done before page load)
             addJavascriptInterface(
-                JavascriptInterface(),
-                "_VideoEnabledWebView"
+                    JavascriptInterface(),
+                    "_VideoEnabledWebView"
             ) // Must match Javascript interface name of VideoEnabledWebChromeClient
             addedJavascriptInterface = true
         }
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
-        var returnValue = false
+        val returnValue: Boolean
         val event = MotionEvent.obtain(ev)
         val action = MotionEventCompat.getActionMasked(event)
         if (action == MotionEvent.ACTION_DOWN) {
@@ -173,61 +173,61 @@ class SmartWebView : WebView, NestedScrollingChild {
     }
 
     override fun isNestedScrollingEnabled(): Boolean {
-        return mChildHelper!!.isNestedScrollingEnabled
+        return mChildHelper?.isNestedScrollingEnabled ?: false
     }
 
     // Nested Scroll implements
     override fun setNestedScrollingEnabled(enabled: Boolean) {
-        mChildHelper!!.isNestedScrollingEnabled = enabled
+        mChildHelper?.isNestedScrollingEnabled = enabled
     }
 
     override fun startNestedScroll(axes: Int): Boolean {
-        return mChildHelper!!.startNestedScroll(axes)
+        return mChildHelper?.startNestedScroll(axes) ?: false
     }
 
     override fun stopNestedScroll() {
-        mChildHelper!!.stopNestedScroll()
+        mChildHelper?.stopNestedScroll()
     }
 
     override fun hasNestedScrollingParent(): Boolean {
-        return mChildHelper!!.hasNestedScrollingParent()
+        return mChildHelper?.hasNestedScrollingParent() ?: false
     }
 
     override fun dispatchNestedScroll(
-        dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
-        offsetInWindow: IntArray?
+            dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
+            offsetInWindow: IntArray?
     ): Boolean {
-        return mChildHelper!!.dispatchNestedScroll(
-            dxConsumed,
-            dyConsumed,
-            dxUnconsumed,
-            dyUnconsumed,
-            offsetInWindow
-        )
+        return mChildHelper?.dispatchNestedScroll(
+                dxConsumed,
+                dyConsumed,
+                dxUnconsumed,
+                dyUnconsumed,
+                offsetInWindow
+        ) ?: false
     }
 
     override fun dispatchNestedPreScroll(
-        dx: Int,
-        dy: Int,
-        consumed: IntArray?,
-        offsetInWindow: IntArray?
+            dx: Int,
+            dy: Int,
+            consumed: IntArray?,
+            offsetInWindow: IntArray?
     ): Boolean {
-        return mChildHelper!!.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow)
+        return mChildHelper?.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow) ?: false
     }
 
     override fun dispatchNestedFling(
-        velocityX: Float,
-        velocityY: Float,
-        consumed: Boolean
+            velocityX: Float,
+            velocityY: Float,
+            consumed: Boolean
     ): Boolean {
-        return mChildHelper!!.dispatchNestedFling(velocityX, velocityY, consumed)
+        return mChildHelper?.dispatchNestedFling(velocityX, velocityY, consumed) ?: false
     }
 
     override fun dispatchNestedPreFling(
-        velocityX: Float,
-        velocityY: Float
+            velocityX: Float,
+            velocityY: Float
     ): Boolean {
-        return mChildHelper!!.dispatchNestedPreFling(velocityX, velocityY)
+        return mChildHelper?.dispatchNestedPreFling(velocityX, velocityY) ?: false
     }
 
     fun canScrollHor(direction: Int): Boolean {
@@ -249,7 +249,7 @@ class SmartWebView : WebView, NestedScrollingChild {
             // This code is not executed in the UI thread, so we must force that to happen
             Handler(Looper.getMainLooper()).post {
                 if (videoEnabledWebChromeClient != null) {
-                    videoEnabledWebChromeClient!!.onHideCustomView()
+                    videoEnabledWebChromeClient?.onHideCustomView()
                 }
             }
         }

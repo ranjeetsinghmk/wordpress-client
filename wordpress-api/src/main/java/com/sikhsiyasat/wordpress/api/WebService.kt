@@ -1,12 +1,19 @@
 package com.sikhsiyasat.wordpress.api
 
+import java.util.*
+import kotlin.collections.ArrayList
+
 interface WebService {
     fun getPost(slug: String): Observable<ApiResponse<Post>>
 
     fun getPosts(
-        page: Int = 0,
-        perPage: Int = 10,
-        context: String = "embed"
+            page: Int = 0,
+            perPage: Int = 10,
+            tags: List<String> = emptyList(),
+            authors: List<String> = emptyList(),
+            categories: List<String> = emptyList(),
+            after: Date,
+            context: String = "embed"
     ): Observable<ApiResponse<List<Post>>>
 }
 
@@ -16,7 +23,7 @@ class Observable<T> {
     private lateinit var onSubscribe: ObservableOnSubscribe<T>
 
     fun subscribe(
-        observer: ObservableObserver<T>
+            observer: ObservableObserver<T>
     ) {
         if (observers.size > limit) {
             throw RuntimeException("Limit exceeded")

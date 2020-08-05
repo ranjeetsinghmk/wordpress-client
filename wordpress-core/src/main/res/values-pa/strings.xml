@@ -15,4 +15,8 @@
     <string name="text_large">ਬੱਡੇ ਅੱਖਰ</string>
     <string name="text_extra_large">ਬਹੁਤ ਬੱਡੇ ਅੱਖਰ</string>
     <string name="text_text_to_speech_not_enabled">ਲਿਖਿਆ ਬੋਲਕੇ ਸੁਣਾਉਣ ਦੀ ਸੁਵਿਧਾ ਇੱਸ ਪੇਜੇ ਲਈ ਉਪਲਬਦ ਨਹੀਂ ਹੈ ਜੀ</string>
+    <string name="text_categories">Categories</string>
+    <string name="text_tags">Tags</string>
+    <string name="text_related_posts">Related posts</string>
+    <string name="text_no_related_posts_found">No related posts found</string>
 </resources>

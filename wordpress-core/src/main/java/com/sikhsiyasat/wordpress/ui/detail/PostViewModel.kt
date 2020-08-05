@@ -14,7 +14,8 @@ class PostViewModel constructor(
         private val wordpressRepository: WordpressRepository
 ) : ViewModel() {
     private var postThemeMV: MutableLiveData<PostTheme> = MutableLiveData(PostTheme.Normal)
-    var postTextToSpeechPlaying: MutableLiveData<Boolean> = MutableLiveData(false)
+    val postTextToSpeechPlaying: MutableLiveData<Boolean> = MutableLiveData(false)
+    val relatedPosts = MutableLiveData<List<DisplayablePost>>(emptyList())
     private var textToSpeechPlaying = false
     var displayToastLD: MutableLiveData<Int> = MutableLiveData(0)
 
@@ -40,6 +41,10 @@ class PostViewModel constructor(
         postTextToSpeechPlaying.postValue(false)
     }
 
+    fun markPostViewed() {
+        post.value?.let { wordpressRepository.markPostViewed(it) }
+    }
+
     private val url: String =
             savedStateHandle[KEY_POST_URL] ?: throw IllegalAccessException("post url is missing")
     val isTextToSpeechEnabled: Boolean =
@@ -51,6 +56,22 @@ class PostViewModel constructor(
         }
     }
     val bookmarked: LiveData<Boolean> = wordpressRepository.isBookmarked(url)
+
+    private fun fetchRelatedPosts() {
+        post.value?.let { displayablePost ->
+            wordpressRepository.relatedPosts(displayablePost)
+                    .observeForever {
+                        relatedPosts.postValue(it)
+                    }
+            wordpressRepository.fetchRelatedPosts(displayablePost)
+        }
+    }
+
+    fun mainViewScrolledY(oldScrollY: Int, scrollY: Int, fullScrollY: Int) {
+        if (oldScrollY != scrollY && scrollY / fullScrollY.toFloat() > 0.8 && relatedPosts.value?.isEmpty() != false) {
+            fetchRelatedPosts()
+        }
+    }
 }
 
 class PostViewModelFactory(

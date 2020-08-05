@@ -199,12 +199,14 @@ class VideoEnabledWebChromeClient
         }
     }
 
+    private var progress: Int = 0
+
     override fun onProgressChanged(
             view: WebView,
             newProgress: Int
     ) {
         super.onProgressChanged(view, newProgress)
-        //TODO store progress in a separate state object
+        progress = newProgress
         pageProgressBar?.progress = newProgress
         if (newProgress == 100) { // Hide the progressbar
             pageProgressBar?.visibility = View.GONE
@@ -212,21 +214,21 @@ class VideoEnabledWebChromeClient
         if (isPageAlmostLoaded) {
             callback?.onAlmostLoaded()
         }
-        if (pageProgressBar?.progress ?: 0 > 95) {
+        if (newProgress > 95) {
             callback?.onContentAvailable(webView?.url)
         }
     }
 
     val isPageAlmostLoaded: Boolean
         get() {
-            logger.info("isPageAlmostLoaded " + pageProgressBar?.progress)
-            return pageProgressBar?.progress ?: 0 > 60
+            logger.info("isPageAlmostLoaded $progress")
+            return progress ?: 0 > 60
         }
 
     val isPageReallyStartedLoading: Boolean
         get() {
-            logger.info("isPageReallyStartedLoading " + pageProgressBar?.progress)
-            return pageProgressBar?.progress ?: 0 > 20
+            logger.info("isPageReallyStartedLoading $progress")
+            return progress ?: 0 > 20
         }
 
     interface Callback {

@@ -14,11 +14,11 @@ import com.sikhsiyasat.wordpress.models.DisplayablePost
 import kotlinx.android.synthetic.main.post.view.*
 import java.text.SimpleDateFormat
 
-class PostsRecyclerViewAdapter(
-    private val posts: List<DisplayablePost>,
-    private val postsInteractionListener: PostsInteractionListener
+class PostsViewAdapter(
+        private val posts: List<DisplayablePost>,
+        private val postsInteractionListener: PostsInteractionListener
 ) :
-    RecyclerView.Adapter<PostsRecyclerViewAdapter.ViewHolder>() {
+        RecyclerView.Adapter<PostsViewAdapter.ViewHolder>() {
 
     private val mOnClickListener: View.OnClickListener
 
@@ -31,7 +31,7 @@ class PostsRecyclerViewAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.post, parent, false)
+                .inflate(R.layout.post, parent, false)
         return ViewHolder(view)
     }
 
@@ -39,12 +39,12 @@ class PostsRecyclerViewAdapter(
         val post = posts[position]
         holder.mTitleView.text = Html.fromHtml(post.title.rendered).toString()
         holder.mPublishDate.text =
-            post.date.let { SimpleDateFormat("MMM dd, yyyy").format(it) } ?: ""
+                post.date.let { SimpleDateFormat("MMM dd, yyyy").format(it) } ?: ""
         holder.mAuthor.text = post.author?.name ?: "Sikh Siyasat"
 
         Glide.with(holder.mView)
-            .load(post.featuredMedia?.sourceUrl)
-            .into(holder.thumbnailView)
+                .load(post.featuredMedia?.sourceUrl)
+                .into(holder.thumbnailView)
 
         with(holder.mView) {
             tag = post

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".ui.detail.PostFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -22,11 +23,116 @@
             app:title="@null" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.sikhsiyasat.webview.SmartWebView
-        android:id="@+id/webview"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/post_nested_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/post_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.sikhsiyasat.webview.SmartWebView
+                android:id="@+id/webview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:scrollbars="none" />
+
+            <View
+                android:id="@+id/first_divider"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_height"
+                android:layout_marginTop="16dp"
+                android:background="@color/grey" />
+
+            <TextView
+                android:id="@+id/post_categories_heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp"
+                android:text="@string/text_categories"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/post_categories_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                tools:itemCount="2"
+                tools:listitem="@layout/tag_layout" />
+
+            <TextView
+                android:id="@+id/post_tags_heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp"
+                android:text="@string/text_tags"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/post_tags_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:nestedScrollingEnabled="false"
+                android:numColumns="auto_fit"
+                tools:itemCount="2"
+                tools:listitem="@layout/tag_layout" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_height"
+                android:layout_marginTop="16dp"
+                android:background="@color/grey" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:text="@string/text_related_posts"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+            <ProgressBar
+                android:id="@+id/related_posts_progress_bar"
+                android:layout_width="@dimen/progress_bar_size"
+                android:layout_height="@dimen/progress_bar_size"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/text_margin" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/related_posts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutManager="LinearLayoutManager"
+                tools:itemCount="3"
+                tools:listitem="@layout/post" />
+
+            <TextView
+                android:id="@+id/related_posts_no_post"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="@dimen/text_margin"
+                android:text="@string/text_no_related_posts_found" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 
     <!-- View where the video will be shown when video goes fullscreen -->
@@ -41,7 +147,7 @@
 
     <ProgressBar
         android:id="@+id/progress_bar"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/progress_bar_size"
+        android:layout_height="@dimen/progress_bar_size"
         android:layout_gravity="center" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
