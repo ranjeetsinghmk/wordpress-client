@@ -68,7 +68,7 @@ data class AvatarUrlsEntity(
 )
 
 
-@Entity(tableName = "post", indices = [Index("link", "slug", "title_rendered", "author")])
+@Entity(tableName = "post", indices = [Index("link", "slug", "title_rendered", "author"), Index("lastAccessTime")])
 data class PostEntity(
         @PrimaryKey
         val id: String,
@@ -84,7 +84,8 @@ data class PostEntity(
         val author: Int,
         val categories: List<Int>,
         val tags: List<Int>,
-        val featuredMedia: String
+        val featuredMedia: String,
+        val lastAccessTime: Date = Date()
 )
 
 class DisplayablePostLiveData(
@@ -268,7 +269,7 @@ sealed class PostTheme(
         entities = [
             PostEntity::class, AuthorEntity::class, TermEntity::class, FeaturedMediaEntity::class
         ],
-        version = 1
+        version = 2
 )
 @TypeConverters(Converters::class)
 abstract class WordpressDatabase : RoomDatabase() {
@@ -292,6 +293,21 @@ interface PostDao {
 
     @Query("SELECT * FROM post WHERE link like :likeExp")
     fun loadWhereLinkLike(likeExp: String): LiveData<List<PostEntity>>
+
+    @Query("UPDATE post SET lastAccessTime = :accessTime WHERE id = :postId")
+    fun updateLastAccessTime(postId: String, accessTime: Date)
+
+    @Query("SELECT * FROM post ORDER BY lastAccessTime ASC LIMIT :limit")
+    fun getLeastRecentlyUsedPosts(limit: Int): List<PostEntity>
+
+    @Query("DELETE FROM post WHERE id IN (SELECT id FROM post ORDER BY lastAccessTime ASC LIMIT :count)")
+    fun deleteLeastRecentlyUsedPosts(count: Int): Int
+
+    @Query("SELECT COUNT(*) FROM post")
+    fun getPostCount(): Int
+
+    @Query("DELETE FROM post WHERE lastAccessTime < :cutoffTime")
+    fun deletePostsOlderThan(cutoffTime: Date): Int
 }
 
 @Dao
@@ -351,7 +367,8 @@ object PostMapper {
                 postEntity.author,
                 postEntity.categories ?: emptyList(),
                 postEntity.tags ?: emptyList(),
-                postEntity.featuredMedia ?: ""
+                postEntity.featuredMedia ?: "",
+                Date() // Set current time as initial access time
         )
     }
 
