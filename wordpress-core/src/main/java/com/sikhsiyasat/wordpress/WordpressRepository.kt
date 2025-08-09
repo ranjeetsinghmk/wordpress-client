@@ -26,8 +26,11 @@ class WordpressRepository(
                 Transformations.switchMap(
                         localStorageService.getPost(postUrl)
                 ) { post ->
-                    post?.let { displayablePostLiveData(listOf(it)) }
-                            ?: displayablePostLiveData(emptyList())
+                    // Mark post as accessed when retrieved
+                    post?.let { 
+                        localStorageService.markPostAsAccessed(it.id)
+                        displayablePostLiveData(listOf(it))
+                    } ?: displayablePostLiveData(emptyList())
                 }
         ) { posts ->
             posts.firstOrNull()
@@ -132,5 +135,38 @@ class WordpressRepository(
     fun isBookmarked(url: String): LiveData<Boolean> {
         logger.info("isBookmarked for url $url clientStorage is not null ${clientStorage != null}")
         return clientStorage?.isBookmarked(url) ?: MutableLiveData(false)
+    }
+
+    // LRU Management API
+
+    /**
+     * Perform LRU cleanup if needed to manage cache size
+     * @return Number of posts deleted
+     */
+    fun performLruCleanupIfNeeded(): Int {
+        return localStorageService.performLruCleanupIfNeeded()
+    }
+
+    /**
+     * Delete posts older than 30 days
+     * @return Number of posts deleted
+     */
+    fun deleteOldPosts(): Int {
+        return localStorageService.deletePostsOlderThan()
+    }
+
+    /**
+     * Perform comprehensive cleanup (both age-based and LRU-based)
+     * @return Pair of (age-based deletions, LRU-based deletions)
+     */
+    fun performComprehensiveCleanup(): Pair<Int, Int> {
+        return localStorageService.performComprehensiveCleanup()
+    }
+
+    /**
+     * Get current post count in cache
+     */
+    fun getCachedPostCount(): Int {
+        return localStorageService.getPostCount()
     }
 }
