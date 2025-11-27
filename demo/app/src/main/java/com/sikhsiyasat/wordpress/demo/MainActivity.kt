@@ -1,5 +1,6 @@
 package com.sikhsiyasat.wordpress.demo
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -9,7 +10,7 @@ import com.sikhsiyasat.wordpress.models.DisplayablePost
 import com.sikhsiyasat.wordpress.ui.detail.PostFragment
 import com.sikhsiyasat.wordpress.ui.list.PostsFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PostFragment.PostInteractionListener {
 
     private val interactionListener = object : PostsFragment.InteractionListener {
         override fun goToPostDetailPage(post: DisplayablePost) {
@@ -55,5 +56,14 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onShareRequested(post: DisplayablePost) {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, post.title.spannedText)
+            putExtra(Intent.EXTRA_TEXT, "${post.title.spannedText}\n\n${post.link}")
+        }
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_post)))
     }
 }
