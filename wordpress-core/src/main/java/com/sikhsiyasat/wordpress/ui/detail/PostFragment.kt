@@ -45,6 +45,7 @@ class PostFragment : Fragment() {
 
     private lateinit var mListener: PostInteractionListener
     private var tts: TextToSpeech? = null
+    private var sentenceTts: SentenceTextToSpeech? = null
     private val viewModel: PostViewModel by viewModels(
             factoryProducer = {
                 PostViewModelFactory(
@@ -195,16 +196,43 @@ class PostFragment : Fragment() {
             return
         }
         if (enabled) {
-            tts?.language = Locale.US
             viewModel.post.value?.let { post ->
                 val textToSpeech = "${post.title.spannedText}.\n" +
                         " ${post.author?.name?.let { "published by $it" }} on ${post.date}.\n" +
                         " ${post.content.spannedText}"
-                tts?.speak(textToSpeech, TextToSpeech.QUEUE_ADD, null)
-            }
+                
+                tts?.let { ttsEngine ->
+                    if (sentenceTts == null) {
+                        sentenceTts = SentenceTextToSpeech(ttsEngine, object : SentenceTextToSpeech.SentenceProgressListener {
+                            override fun onStarted(totalSentences: Int) {
+                                log.info("TTS started with $totalSentences sentences")
+                            }
 
+                            override fun onSentenceStarted(index: Int, sentence: String) {
+                                log.info("TTS reading sentence ${index + 1}: ${sentence.take(50)}...")
+                            }
+
+                            override fun onComplete() {
+                                log.info("TTS completed all sentences")
+                                activity?.runOnUiThread {
+                                    viewModel.postTextToSpeechPlaying.postValue(false)
+                                }
+                            }
+
+                            override fun onStopped() {
+                                log.info("TTS stopped")
+                            }
+
+                            override fun onError(utteranceId: String?) {
+                                log.info("TTS error on utterance: $utteranceId")
+                            }
+                        })
+                    }
+                    sentenceTts?.speak(textToSpeech, Locale.US)
+                }
+            }
         } else {
-            tts?.stop()
+            sentenceTts?.stop()
         }
     }
 
