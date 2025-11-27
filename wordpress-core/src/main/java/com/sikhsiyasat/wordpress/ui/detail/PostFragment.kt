@@ -297,6 +297,8 @@ class PostFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        sentenceTts?.stop()
+        sentenceTts = null
         tts?.shutdown()
     }
 

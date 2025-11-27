@@ -117,9 +117,9 @@ class SentenceTextToSpeech(
         fun splitIntoSentences(text: String): List<String> {
             if (text.isBlank()) return emptyList()
             
-            // Split on sentence-ending punctuation followed by whitespace or end of string
-            // Also handles newlines as sentence breaks
-            val sentencePattern = Regex("""(?<=[.!?])\s+|(?<=\n)\s*""")
+            // Split on sentence-ending punctuation followed by whitespace
+            // or on newlines (which act as natural sentence breaks in article content)
+            val sentencePattern = Regex("""(?<=[.!?])\s+|\n+""")
             
             return text.split(sentencePattern)
                 .map { it.trim() }
