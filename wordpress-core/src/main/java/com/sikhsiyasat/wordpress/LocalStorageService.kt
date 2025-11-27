@@ -2,12 +2,14 @@ package com.sikhsiyasat.wordpress
 
 import androidx.lifecycle.LiveData
 import com.sikhsiyasat.wordpress.api.Post
+import com.sikhsiyasat.wordpress.api.TermTaxonomy
 import com.sikhsiyasat.wordpress.models.*
 
 class LocalStorageService constructor(
     private val postDao: PostDao,
     private val authorDao: AuthorDao,
-    private val termDao: TermDao,
+    private val categoryDao: CategoryDao,
+    private val tagDao: TagDao,
     private val featuredMediaDao: FeaturedMediaDao
 ) {
 
@@ -30,11 +32,21 @@ class LocalStorageService constructor(
                 .distinctBy { it.id }
                 .toSet()
         )
-        termDao.save(
+        categoryDao.save(
             posts.mapNotNull { it.embeddedData }
                 .flatMap { it.terms }
                 .flatten()
-                .map { PostMapper.termEntity(it) }
+                .filter { it.taxonomy == TermTaxonomy.category }
+                .map { PostMapper.categoryEntity(it) }
+                .distinctBy { it.id }
+                .toSet()
+        )
+        tagDao.save(
+            posts.mapNotNull { it.embeddedData }
+                .flatMap { it.terms }
+                .flatten()
+                .filter { it.taxonomy == TermTaxonomy.post_tag }
+                .map { PostMapper.tagEntity(it) }
                 .distinctBy { it.id }
                 .toSet()
         )
@@ -53,9 +65,9 @@ class LocalStorageService constructor(
 
     fun getAuthors(ids: List<String>): LiveData<List<AuthorEntity>> = authorDao.load(ids)
 
-    fun getCategories(ids: List<String>): LiveData<List<TermEntity>> = termDao.load(ids)
+    fun getCategories(ids: List<String>): LiveData<List<CategoryEntity>> = categoryDao.load(ids)
 
-    fun getTags(ids: List<String>): LiveData<List<TermEntity>> = termDao.load(ids)
+    fun getTags(ids: List<String>): LiveData<List<TagEntity>> = tagDao.load(ids)
 
     fun getFeaturedMedia(ids: List<String>) = featuredMediaDao.load(ids)
 }
