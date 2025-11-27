@@ -12,20 +12,23 @@ import com.sikhsiyasat.wordpress.api.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-//TODO separate out category & tags
-@Entity(tableName = "wp_temp", indices = [Index("id", "name", "taxonomy")])
-data class TermEntity(
+@Entity(tableName = "category", indices = [Index("id", "name", "slug")])
+data class CategoryEntity(
         @PrimaryKey
         val id: Int,
         val link: String,
         val name: String,
-        val slug: String,
-        val taxonomy: TermTaxonomyEntity
+        val slug: String
 )
 
-enum class TermTaxonomyEntity {
-    category, post_tag
-}
+@Entity(tableName = "tag", indices = [Index("id", "name", "slug")])
+data class TagEntity(
+        @PrimaryKey
+        val id: Int,
+        val link: String,
+        val name: String,
+        val slug: String
+)
 
 @Entity(tableName = "feature_media", indices = [Index("id", "type", "mimeType")])
 data class FeaturedMediaEntity(
@@ -90,8 +93,8 @@ data class PostEntity(
 class DisplayablePostLiveData(
         private val posts: List<PostEntity>,
         private val authorsLD: LiveData<List<AuthorEntity>>,
-        private val categoriesLD: LiveData<List<TermEntity>>,
-        private val tagsLD: LiveData<List<TermEntity>>,
+        private val categoriesLD: LiveData<List<CategoryEntity>>,
+        private val tagsLD: LiveData<List<TagEntity>>,
         private val featureMediaLD: LiveData<List<FeaturedMediaEntity>>
 ) : MediatorLiveData<List<DisplayablePost>>() {
     private fun combine() {
@@ -135,8 +138,8 @@ data class DisplayablePost(
         val content: PostField,
         val excerpt: PostField,
         val author: AuthorEntity?,
-        val categories: List<TermEntity>,
-        val tags: List<TermEntity>,
+        val categories: List<CategoryEntity>,
+        val tags: List<TagEntity>,
         val featuredMedia: FeaturedMediaEntity?,
         var theme: PostTheme = PostTheme.Normal
 ) {
@@ -266,15 +269,16 @@ sealed class PostTheme(
 
 @Database(
         entities = [
-            PostEntity::class, AuthorEntity::class, TermEntity::class, FeaturedMediaEntity::class
+            PostEntity::class, AuthorEntity::class, CategoryEntity::class, TagEntity::class, FeaturedMediaEntity::class
         ],
-        version = 1
+        version = 2
 )
 @TypeConverters(Converters::class)
 abstract class WordpressDatabase : RoomDatabase() {
     abstract fun postDao(): PostDao
     abstract fun authorDao(): AuthorDao
-    abstract fun termDao(): TermDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun tagDao(): TagDao
     abstract fun featuredMediaDao(): FeaturedMediaDao
 }
 
@@ -307,12 +311,21 @@ interface AuthorDao {
 }
 
 @Dao
-interface TermDao {
+interface CategoryDao {
     @Insert(onConflict = REPLACE)
-    fun save(post: Set<TermEntity>)
+    fun save(categories: Set<CategoryEntity>)
 
-    @Query("SELECT * FROM wp_temp WHERE id in (:ids)")
-    fun load(ids: List<String>): LiveData<List<TermEntity>>
+    @Query("SELECT * FROM category WHERE id in (:ids)")
+    fun load(ids: List<String>): LiveData<List<CategoryEntity>>
+}
+
+@Dao
+interface TagDao {
+    @Insert(onConflict = REPLACE)
+    fun save(tags: Set<TagEntity>)
+
+    @Query("SELECT * FROM tag WHERE id in (:ids)")
+    fun load(ids: List<String>): LiveData<List<TagEntity>>
 }
 
 @Dao
@@ -367,16 +380,19 @@ object PostMapper {
         return AvatarUrlsEntity(avatarUrls.twentyFour, avatarUrls.fortyEight, avatarUrls.ninetySix)
     }
 
-    fun termEntity(term: Term): TermEntity = TermEntity(
+    fun categoryEntity(term: Term): CategoryEntity = CategoryEntity(
             term.id,
             term.link,
             term.name,
-            term.slug,
-            taxonomyEntity(term.taxonomy)
+            term.slug
     )
 
-    private fun taxonomyEntity(taxonomy: TermTaxonomy): TermTaxonomyEntity =
-            TermTaxonomyEntity.valueOf(taxonomy.name)
+    fun tagEntity(term: Term): TagEntity = TagEntity(
+            term.id,
+            term.link,
+            term.name,
+            term.slug
+    )
 
     fun featuredMediaEntity(featuredMedia: FeaturedMedia): FeaturedMediaEntity =
             FeaturedMediaEntity(
@@ -416,11 +432,4 @@ class Converters {
         val listType = object : TypeToken<List<Int>>() {}.type
         return Gson().fromJson(string, listType)
     }
-
-    @TypeConverter
-    fun fromTermTaxonomy(value: TermTaxonomyEntity?): String? = value?.name
-
-    @TypeConverter
-    fun toTermTaxonomy(string: String?): TermTaxonomyEntity? =
-            string?.let { TermTaxonomyEntity.valueOf(it) }
 }

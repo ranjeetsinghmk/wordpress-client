@@ -26,7 +26,8 @@ object AppScope {
             LocalStorageService(
                 database.postDao(),
                 database.authorDao(),
-                database.termDao(),
+                database.categoryDao(),
+                database.tagDao(),
                 database.featuredMediaDao()
             )
         }
