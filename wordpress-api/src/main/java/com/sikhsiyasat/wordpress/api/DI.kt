@@ -9,8 +9,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLSession
 
-
+/**
+ * Application-level dependency injection scope for WordPress API.
+ * Provides singleton instances of web client components.
+ */
 object AppScope {
+    /**
+     * Provides a WebClient instance for creating WordPress API services.
+     */
     val webClient: WebClient
         get() = WebClient(retrofitServiceFactory)
 
@@ -18,8 +24,19 @@ object AppScope {
         get() = RetrofitServiceFactory()
 }
 
-
+/**
+ * Client for accessing WordPress REST API services.
+ * Creates WebService instances configured for specific WordPress site URLs.
+ * 
+ * @param retrofitServiceFactory Factory for creating Retrofit instances
+ */
 class WebClient(private val retrofitServiceFactory: RetrofitServiceFactory) {
+    /**
+     * Creates a WebService instance for the specified WordPress site.
+     * 
+     * @param websiteUrl Base URL of the WordPress site (e.g., "https://example.com")
+     * @return WebService instance configured for the WordPress REST API
+     */
     fun webService(websiteUrl: String): WebService {
         return WebServiceImpl(
             retrofitServiceFactory.provideRetrofit(websiteUrl)
@@ -28,19 +45,38 @@ class WebClient(private val retrofitServiceFactory: RetrofitServiceFactory) {
     }
 }
 
-
+/**
+ * Factory for creating and caching Retrofit instances.
+ * Ensures a single Retrofit instance per WordPress site URL.
+ */
 class RetrofitServiceFactory {
     private val retrofits: MutableMap<String, Retrofit> = HashMap()
 
+    /**
+     * Provides a Retrofit instance for the specified WordPress site.
+     * Caches instances to avoid recreating them for the same URL.
+     * 
+     * @param websiteUrl Base URL of the WordPress site
+     * @return Configured Retrofit instance
+     */
     fun provideRetrofit(websiteUrl: String): Retrofit {
         val retrofit = retrofits[websiteUrl] ?: retrofit(websiteUrl)
         retrofits[websiteUrl] = retrofit
         return retrofit
     }
 
+    /**
+     * Creates a new Retrofit instance configured for WordPress REST API v2.
+     * 
+     * Configuration:
+     * - Base URL: {websiteUrl}/wp-json/wp/v2/
+     * - JSON field naming: lower_case_with_underscores (WordPress convention)
+     * - Date format: ISO 8601 (yyyy-MM-dd'T'hh:mm:ss)
+     * - Connection timeout: 120 seconds
+     * - HTTP logging enabled for debugging
+     */
     private fun retrofit(websiteUrl: String): Retrofit = Retrofit.Builder()
         .baseUrl("$websiteUrl/wp-json/wp/v2/")
-//        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .client(okHttpClient)
         .addConverterFactory(
             GsonConverterFactory.create(
@@ -71,6 +107,10 @@ class RetrofitServiceFactory {
                 .build()
 }
 
+/**
+ * Scope for post listing operations.
+ * Reserved for future use.
+ */
 object ListPostsScope {
 
 }
